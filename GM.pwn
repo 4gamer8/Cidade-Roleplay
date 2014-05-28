@@ -11,7 +11,6 @@
 #include <dof2>
 #include <sscanf>
 #include <zcmd>
-#pragma unused DOF2_Exit
 //----------------------------------------------------------
 //
 //  Variaveis e Definições
@@ -231,8 +230,9 @@ main()
 }
 public OnGameModeExit()
 {
-	KillTimer(Timer_PlayerUpdate);
-	KillTimer(Timer_Random);
+    KillTimer(Timer_PlayerUpdate);
+    KillTimer(Timer_Random);
+    DOF2_Exit();
     return true;
 }
 public OnPlayerConnect(playerid)
