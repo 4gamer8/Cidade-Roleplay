@@ -693,24 +693,20 @@ COMMAND:status(playerid)
 	SendClientMessage(playerid, COLOR_FADE2, String);
 	return true;
 }
+
 COMMAND:me(playerid, params[])
 {
-	new Acao[128];
-	new String[128];
-	new Float: p[3];
-	GetPlayerPos(playerid, p[0], p[1], p[2]);
-	if(sscanf(params,"s[128]",Acao))
+	if(sscanf(params,"s[128]", params[0]))
 	    return SendClientMessage(playerid, Cinza, "Comando: /me [ação]");
-	format(String, sizeof String, "* %s %s.", Nome(playerid), Acao);
+	new Float: p[3], String[128];
+	GetPlayerPos(playerid, p[0], p[1], p[2]);
+	format(String, sizeof String, "* %s %s.", Nome(playerid), params[0]);
     for(new chat; chat < MAX_PLAYERS; chat++)
-    {
 		if(IsPlayerInRangeOfPoint(playerid, 10.0, p[0], p[1], p[2]))
-        {
-        	SendClientMessage(playerid, -1, String);
-        }
-  	}
+			SendClientMessage(playerid, -1, String);
 	return true;
 }
+
 COMMAND:ask(playerid, params[])
 {
 	new Pergunta[128];
