@@ -1088,6 +1088,7 @@ stock CriarConta(playerid, sendername[], password[])
 	format(file, sizeof file, "Contas/%s.ini", sendername);
 	if(!DOF2_FileExists(file))
 	{
+	    DOF2_CreateFile(file);
 	    DOF2_SetString(file, "Password", password);
 	    DOF2_SetInt(file, "Admin", 0);
 	    DOF2_SetInt(file, "Dinheiro", 350);
