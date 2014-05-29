@@ -907,6 +907,34 @@ COMMAND:servico(playerid)
 	}
 	return true;
 }
+
+CMD:banir(playerid, params[]) {
+	new Motivo[128],
+	    bannedid,
+	    Vari[256]
+	;
+	
+	if(pDados[playerid][Admin] < 1)
+		return SendClientMessage(playerid, Cinza, "| ERRO | Você não possui permissão para isso!");
+		
+	if( !EmServico[playerid] )
+        	return SendClientMessage(playerid, Cinza, "| ERRO | Você não está em modo serviço!");		
+ 
+	if(sscanf(params, "us[100]", bannedid, Motivo)) return SendClientMessage(playerid, Aviso, "|ERRO| Comando formulado errado. /banir [ID] [Motivo]");
+
+    	format(Vari, sizeof(Vari), "|CP:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(kickid), bannedid, Motivo);
+    	SendClientMessageToAll(Aviso, Vari);
+
+	Ban(bannedid);
+	
+	// Consideração!
+	// Espero que tenha ajudado. Estarei adicionando mais coisas para ajuda-lo.
+	// Espero que prossiga com esse projeto, tem meu total apoio.
+	// ProKillerPa! :)
+	return 1;
+	
+}
+
 CMD:kick(playerid, params[])
 {
     new Razao[128], kickid, String[200];
