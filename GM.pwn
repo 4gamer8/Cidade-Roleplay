@@ -922,7 +922,7 @@ CMD:banir(playerid, params[]) {
 
 	if(sscanf(params, "us[100]", bannedid, Motivo)) return SendClientMessage(playerid, Cinza, "Comando: /banir [playerid] [motivo]");
 
-   	format(Vari, sizeof(Vari), "|CI:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(kickid), bannedid, Motivo);
+   	format(Vari, sizeof(Vari), "|CI:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(bannedid), bannedid, Motivo);
    	SendClientMessageToAll(Aviso, Vari);
 
 	Ban(bannedid);
