@@ -113,7 +113,7 @@ main()
 	print("CIDADE ROLEPLAY  1.0 [ CI:RP ]\n\n");
 	print("- Cidade:RP ( Open Source )\n");
 	print("- Projeto iniciado por: Input\n");
-	
+
 }
 
 public OnGameModeInit()
@@ -125,7 +125,7 @@ public OnGameModeInit()
 	DisableInteriorEnterExits();
 	ShowPlayerMarkers(false);
 	ConnectNPC("Dave","pizzaria_atendente");
-	
+
 	// timers
 
 	for(new i = 0; i < MAX_PLAYERS; ++ i)
@@ -133,7 +133,7 @@ public OnGameModeInit()
 		Timer_PlayerUpdate = SetTimerEx("PlayerUpdate", 1000, true, "u", i);
 	}
 	Timer_Random = SetTimer("Mensagem_Random", 20*60000, true);
-	
+
 	SetTimer("Relogio", 1000, true); // relogio
 
 	// Rotas Caminhoneiros:
@@ -260,7 +260,7 @@ public OnPlayerConnect(playerid)
 
 	for(new i = 0; i < 100; ++i)
 		SendClientMessage(playerid, Branco, " ");
-    
+
 	EmServico[playerid] 			= false;
 	Logado[playerid] 				= false;
 	IsPlayerInDave[playerid]    	= false;
@@ -611,7 +611,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 }
 public OnPlayerUpdate(playerid)
 {
-	
+
 	return true;
 }
 
@@ -769,7 +769,7 @@ COMMAND:entregar(playerid)
 	rDados[RotaID[playerid]][rBloqueio] = 0;
 	GivePlayerMoney(playerid, rDados[RotaID[playerid]][rValor]);
 	format(xString, sizeof xString, "~r~+$%d", rDados[RotaID[playerid]][rValor]);
-	GameTextForPlayer(playerid, String, 200, 1);
+	GameTextForPlayer(playerid, xString, 200, 1);
 	for(new i = 0; i < MAX_PLAYERS; ++ i)
 	{
 	    if(pDados[i][Emprego] == CAMINHONEIRO)
@@ -913,26 +913,26 @@ CMD:banir(playerid, params[]) {
 	    bannedid,
 	    Vari[256]
 	;
-	
+
 	if(pDados[playerid][Admin] < 1)
 		return SendClientMessage(playerid, Cinza, "| ERRO | Você não possui permissão para isso!");
-		
-	if( !EmServico[playerid] )
-        	return SendClientMessage(playerid, Cinza, "| ERRO | Você não está em modo serviço!");		
- 
-	if(sscanf(params, "us[100]", bannedid, Motivo)) return SendClientMessage(playerid, Aviso, "|ERRO| Comando formulado errado. /banir [ID] [Motivo]");
 
-    	format(Vari, sizeof(Vari), "|CP:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(kickid), bannedid, Motivo);
-    	SendClientMessageToAll(Aviso, Vari);
+	if( !EmServico[playerid] )
+        	return SendClientMessage(playerid, Cinza, "| ERRO | Você não está em modo serviço!");
+
+	if(sscanf(params, "us[100]", bannedid, Motivo)) return SendClientMessage(playerid, Cinza, "Comando: /banir [playerid] [motivo]");
+
+   	format(Vari, sizeof(Vari), "|CI:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(kickid), bannedid, Motivo);
+   	SendClientMessageToAll(Aviso, Vari);
 
 	Ban(bannedid);
-	
+
 	// Consideração!
 	// Espero que tenha ajudado. Estarei adicionando mais coisas para ajuda-lo.
 	// Espero que prossiga com esse projeto, tem meu total apoio.
 	// ProKillerPa! :)
 	return 1;
-	
+
 }
 
 CMD:kick(playerid, params[])
