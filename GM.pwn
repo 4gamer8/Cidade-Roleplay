@@ -908,19 +908,34 @@ COMMAND:servico(playerid)
 	return true;
 }
 
+COMMAND:av(playerid, params[])
+{
+	new Mensagem[200];
+
+    if(pDados[playerid][Admin] < 1)
+         return SendClientMessage(playerid, Cinza, "• Apenas pessoal autorizado.");
+    if( !EmServico[playerid] )
+        return SendClientMessage(playerid, Cinza, "• Apenas para administradores em serviço.");
+	if(sscanf(params,"s[200]", Mensagem))
+	    return SendClientMessage(playerid, Cinza, "Comando: /av [mensagem]");
+
+	format(xString, sizeof xString, "[ Aviso Administrativo ] %s: %s.", Nome(playerid), Mensagem);
+	SendClientMessageToAll(Amarelo2, xString);
+	return true;
+}
+
 CMD:banir(playerid, params[]) {
 	new Motivo[128],
 	    bannedid,
 	    Vari[256]
 	;
 
-	if(pDados[playerid][Admin] < 1)
-		return SendClientMessage(playerid, Cinza, "| ERRO | Você não possui permissão para isso!");
-
-	if( !EmServico[playerid] )
-        	return SendClientMessage(playerid, Cinza, "| ERRO | Você não está em modo serviço!");
-
-	if(sscanf(params, "us[100]", bannedid, Motivo)) return SendClientMessage(playerid, Cinza, "Comando: /banir [playerid] [motivo]");
+    if(pDados[playerid][Admin] < 1)
+         return SendClientMessage(playerid, Cinza, "• Apenas pessoal autorizado.");
+    if( !EmServico[playerid] )
+        return SendClientMessage(playerid, Cinza, "• Apenas para administradores em serviço.");
+	if(sscanf(params, "us[100]", bannedid, Motivo))
+		return SendClientMessage(playerid, Cinza, "Comando: /banir [playerid] [motivo]");
 
    	format(Vari, sizeof(Vari), "|CI:RP| O(A) Administrador(a) %s baniu o(a) jogador(a) %s! ( Motivo: %s! )", Nome(playerid), Nome(bannedid), bannedid, Motivo);
    	SendClientMessageToAll(Aviso, Vari);
