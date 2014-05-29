@@ -907,6 +907,22 @@ COMMAND:servico(playerid)
 	}
 	return true;
 }
+CMD:kick(playerid, params[])
+{
+    new Razao[128], kickid, String[200];
+    if(pDados[playerid][Admin] < 1)
+         return SendClientMessage(playerid, Cinza, "• Apenas pessoal autorizado.");
+    if( !EmServico[playerid] )
+        return SendClientMessage(playerid, Cinza, "• Apenas para administradores em serviço.");
+    if(sscanf(params, "us[100]", kickid, Razao)) return SendClientMessage(playerid, Aviso, "Comando: /kick [playerid] [motivo]");
+    if(!IsPlayerConnected(kickid))
+        return SendClientMessage(playerid, Aviso, "[ERRO] ID invalido");
+    if(pDados[kickid][Admin] > pDados[playerid][Admin]) return SendClientMessage(playerid, Aviso, "Você não pode fazer nada contra um admin superior a você!");
+    format(String, sizeof(String), "O Admin %s Kickou o Jogador %s[ID: %d] pelo motivo: %s", Nome(playerid), Nome(kickid), kickid, Razao);
+    SendClientMessageToAll(Aviso, String);
+    Kick(kickid);
+    return 1;
+}
 COMMAND:definirskin(playerid, params[])
 {
 	new skinid;
