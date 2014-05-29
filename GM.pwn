@@ -1085,6 +1085,11 @@ stock CriarRota(Float:X, Float:Y, Float:Z, nome[], carga, valor, exp)
 }
 stock CriarConta(playerid, sendername[], password[])
 {
+	if(!strlen(password))
+	{
+		ShowPlayerDialog(playerid, DIALOG_REGISTRO, DIALOG_STYLE_PASSWORD, "..:: Efetuando Cadastro ::..", "Seja bem vindo ao CidadeRP!\nEsta conta não está registrada em nosso banco de dados..\nDigite abaixo a sua senha:", "Cadastrar", "Sair");
+		SendClientMessage(playerid, Branco, "SERVER: INSIRA A SUA PASSWORD!");
+	}
 	new file[70];
 	format(file, sizeof file, "Contas/%s.ini", sendername);
 	if(!DOF2_FileExists(file))
