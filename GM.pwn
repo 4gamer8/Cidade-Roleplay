@@ -22,18 +22,21 @@
 #define MAX_ROTAS                   ( 50 )
 #define DIRETORIO_CAMINHONEIRO      "Empregos/Caminhoneiro"
 
-#define Amarelo     			 0xFFFF00AA
-#define Branco      			 0xFFFFFFAA
-#define Cinza       			 0xC0C0C0AA
-#define COLOR_FADE1              0xE6E6E6E6
-#define COLOR_FADE2 	         0xC8C8C8C8
-#define COLOR_FADE3              0xAAAAAAAA
-#define COLOR_FADE4              0x8C8C8C8C
-#define COLOR_FADE5              0x6E6E6E6E
-#define COLOR_PURPLE             0xC2A2DAAA
-#define Amarelo2	             0xF5DEB3AA
-#define AzulBB                   0xCCCCFFFF
-#define Aviso                    0xFF6347AA
+enum // Cores
+{
+	Amarelo    		= 	0xFFFF00AA,
+	Branco      	=	0xFFFFFFAA,
+	Cinza       	=	0xC0C0C0AA,
+	COLOR_FADE1     =	0xE6E6E6E6,
+	COLOR_FADE2 	=	0xC8C8C8C8,
+	COLOR_FADE3     =	0xAAAAAAAA,
+	COLOR_FADE4     =	0x8C8C8C8C,
+	COLOR_FADE5     =	0x6E6E6E6E,
+	COLOR_PURPLE    =	0xC2A2DAAA,
+	Amarelo2	    =	0xF5DEB3AA,
+	AzulBB          =	0xCCCCFFFF,
+	Aviso           =	0xFF6347AA
+}
 
 enum // Dialog's.
 {
@@ -98,12 +101,22 @@ new MensagensRandom[][128] = {
 	{"[ CidadeRP ]: Está afim de se comunicar com a administração? Então use /ask!"},
 	{"[ CidadeRP ]: Não sabe os comandos do servidor? Então use /ajuda."}
 };
+
+new xString[128]; // string principal usada para comandos e coisa simples
 //----------------------------------------------------------
 //
 //  Callbacks e Main()
 //
 //----------------------------------------------------------
 main()
+{
+	print("CIDADE ROLEPLAY  1.0 [ CI:RP ]\n\n");
+	print("- Cidade:RP ( Open Source )\n");
+	print("- Projeto iniciado por: Input\n");
+	
+}
+
+public OnGameModeInit()
 {
 	SendRconCommand("hostname [CidadeRP] v1.0");
 	SendRconCommand("mapname San Andreas");
@@ -163,7 +176,7 @@ main()
 	TextDrawSetOutline(Interface[1], 0);
 	TextDrawSetProportional(Interface[1], 1);
 	TextDrawSetShadow(Interface[1], 1);
-	
+
 	Interface[2] = TextDrawCreate(535.000000, 404.000000, "OPENSOURCE");
 	TextDrawBackgroundColor(Interface[2], 255);
 	TextDrawFont(Interface[2], 3);
@@ -242,9 +255,7 @@ public OnPlayerConnect(playerid)
 	format(file, sizeof file, "Contas/%s.ini", Nome(playerid));
 
 	for(new i = 0; i < 100; ++i)
-	{
-	    SendClientMessage(playerid, Branco, " ");
-	}
+		SendClientMessage(playerid, Branco, " ");
     
 	EmServico[playerid] 			= false;
 	Logado[playerid] 				= false;
@@ -253,7 +264,7 @@ public OnPlayerConnect(playerid)
 	Taxistas_CorridaPreco[playerid]	= 0;
 	Passageiro_Tempo[playerid]		= 0;
 	Passageiro_Preco[playerid]		= 0;
-	
+
 	if(!IsPlayerNPC(playerid))
 	{
 		if(DOF2_FileExists(file))
@@ -550,7 +561,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		                GivePlayerMoney(playerid, -25);
 		                pDados[playerid][Dinheiro] -= 25;
 		            }
-		            
+
 		            case 3: //[PIZZA] 4 Queijos [PEQUENA]. - $15.00
 		            {
 		                SendClientMessage(playerid, Amarelo2, "» Você comeu uma pizza 4 Queijos [PEQUENA] no valor de $15,00");
@@ -569,7 +580,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		                GivePlayerMoney(playerid, -25);
 		                pDados[playerid][Dinheiro] -= 25;
 		            }
-		            
+
 		            case 6: //[PIZZA] Calabresa com Catupiry [PEQUENA]. - $25.00
 		            {
 		                SendClientMessage(playerid, Amarelo2, "» Você comeu uma pizza Calabresa com Catupiry [PEQUENA] no valor de $25,00");
@@ -698,28 +709,26 @@ COMMAND:me(playerid, params[])
 {
 	if(sscanf(params,"s[128]", params[0]))
 	    return SendClientMessage(playerid, Cinza, "Comando: /me [ação]");
-	new Float: p[3], String[128];
+	new Float: p[3];
 	GetPlayerPos(playerid, p[0], p[1], p[2]);
-	format(String, sizeof String, "* %s %s.", Nome(playerid), params[0]);
+	format(xString, sizeof xString, "* %s %s.", Nome(playerid), params[0]);
     for(new chat; chat < MAX_PLAYERS; chat++)
 		if(IsPlayerInRangeOfPoint(playerid, 10.0, p[0], p[1], p[2]))
-			SendClientMessage(playerid, -1, String);
+			SendClientMessage(playerid, -1, xString);
 	return true;
 }
 
 COMMAND:ask(playerid, params[])
 {
-	new Pergunta[128];
-	new String[128];
-	if(sscanf(params,"s[128]",Pergunta))
+	if(sscanf(params,"s[128]", params[0]))
 		return SendClientMessage(playerid, Cinza, "Comando: /ask [pergunta]");
 
 	for(new i = 0; i < MAX_PLAYERS; ++i)
 	{
 	    if( pDados[i][Admin] > 0 )
 	    {
-			format(String, sizeof String, "• Pergunta (/ask): %s [ID:%d] » %s.", Nome(playerid), playerid, Pergunta);
-			SendClientMessage(i, Amarelo, String);
+			format(xString, sizeof(xString), "• Pergunta (/ask): %s [ID:%d] » %s.", Nome(playerid), playerid, params[0]);
+			SendClientMessage(i, Amarelo, xString);
 		}
 	}
 
@@ -757,7 +766,6 @@ COMMAND:ajuda(playerid)
 //----------------------------------------------------------
 COMMAND:entregar(playerid)
 {
-	new String[128];
 	if(RotaID[playerid] == 555)
 	    return SendClientMessage(playerid, Cinza, "Você não está fazendo entregas!");
 	if(!IsPlayerInRangeOfPoint(playerid, 2.0, rDados[RotaID[playerid]][rX],rDados[RotaID[playerid]][rY],rDados[RotaID[playerid]][rZ]))
@@ -765,14 +773,14 @@ COMMAND:entregar(playerid)
 	pDados[playerid][Dinheiro] += rDados[RotaID[playerid]][rValor];
 	rDados[RotaID[playerid]][rBloqueio] = 0;
 	GivePlayerMoney(playerid, rDados[RotaID[playerid]][rValor]);
-	format(String, sizeof String, "~r~+$%d", rDados[RotaID[playerid]][rValor]);
+	format(xString, sizeof xString, "~r~+$%d", rDados[RotaID[playerid]][rValor]);
 	GameTextForPlayer(playerid, String, 200, 1);
 	for(new i = 0; i < MAX_PLAYERS; ++ i)
 	{
 	    if(pDados[i][Emprego] == CAMINHONEIRO)
 	    {
-	        format(String, sizeof String, "( Atenção Caminhoneiros ) O Caminhoneiro %s acaba de cumprir a rota %d, agora ela está liberada!", Nome(playerid), RotaID[playerid]);
-	        SendClientMessage(i, Amarelo2, String);
+	        format(xString, sizeof xString, "( Atenção Caminhoneiros ) O Caminhoneiro %s acaba de cumprir a rota %d, agora ela está liberada!", Nome(playerid), RotaID[playerid]);
+	        SendClientMessage(i, Amarelo2, xString);
 		}
 
 	}
@@ -783,20 +791,19 @@ COMMAND:entregar(playerid)
 COMMAND:rotas(playerid)
 {
 	new Dialog[500];
-	new String[128];
 	new file[70];
 	format(file, sizeof file, "%s/ultimo.ini", DIRETORIO_CAMINHONEIRO);
 	for(new i = 0; i < DOF2_GetInt(file, "Ultimo ID"); i++)
 	{
 	    if(rDados[i][rBloqueio] == 0)
 	    {
-			format(String, sizeof String, "{FFFFFF}[ ID:%d ] Nome: [%s] Valor: [$%d] Carga: [%d]\n", rDados[i][rID], rDados[i][rNome], rDados[i][rValor], rDados[i][rCarga]);
+			format(xString, sizeof xString, "{FFFFFF}[ ID:%d ] Nome: [%s] Valor: [$%d] Carga: [%d]\n", rDados[i][rID], rDados[i][rNome], rDados[i][rValor], rDados[i][rCarga]);
 		}
 	  	else if(rDados[i][rBloqueio] == 1)
 	    {
-			format(String, sizeof String, "{CC0000}[ ID:%d ] Nome: [%s] Valor: [$%d] Carga: [%d] (aproximadamente %d minutos)\n", rDados[i][rID], rDados[i][rNome], rDados[i][rValor], rDados[i][rCarga], MinProx(rDados[i][rTempo]));
+			format(xString, sizeof xString, "{CC0000}[ ID:%d ] Nome: [%s] Valor: [$%d] Carga: [%d] (aproximadamente %d minutos)\n", rDados[i][rID], rDados[i][rNome], rDados[i][rValor], rDados[i][rCarga], MinProx(rDados[i][rTempo]));
 		}
-		strcat(Dialog, String);
+		strcat(Dialog, xString);
 	}
 	ShowPlayerDialog(playerid, DIALOG_NULL, DIALOG_STYLE_LIST, "Rotas Liberadas:", Dialog, "Fechar", #);
 	return true;
@@ -1067,7 +1074,7 @@ stock CriarRota(Float:X, Float:Y, Float:Z, nome[], carga, valor, exp)
 	DOF2_CreateFile(file);
 	DOF2_SetString(file, "Nome", nome);
 	DOF2_SetInt(file, "Carga", carga);
-	
+
 	DOF2_SetFloat(file, "X", X);
 	DOF2_SetFloat(file, "Y", Y);
 	DOF2_SetFloat(file, "Z", Z);
@@ -1077,7 +1084,7 @@ stock CriarRota(Float:X, Float:Y, Float:Z, nome[], carga, valor, exp)
 	DOF2_SetInt(file, "ID", DOF2_GetInt(file2, "Ultimo ID"));
 	DOF2_SetInt(file, "Bloqueio", 0);
 	DOF2_SetInt(file, "Tempo", 0);
-	
+
 	DOF2_SetInt(file2, "Ultimo ID", DOF2_GetInt(file2, "Ultimo ID") + 1);
 	DOF2_SaveFile();
 	return true;
@@ -1108,7 +1115,7 @@ stock CriarConta(playerid, sendername[], password[])
 		pDados[playerid][Cigarros] 	= DOF2_GetInt(file, "Cigarros");
 		pDados[playerid][Camisinha] = DOF2_GetInt(file, "Camisinha");
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
-		
+
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
@@ -1138,11 +1145,11 @@ stock SalvarConta(playerid)
 	DOF2_SetInt(file, "Admin", pDados[playerid][Admin]);
 	DOF2_SetInt(file, "Skin", pDados[playerid][Skin]);
 	DOF2_SetInt(file, "Dinheiro", pDados[playerid][Dinheiro]);
-	
+
 	DOF2_SetInt(file, "Cigarros", pDados[playerid][Cigarros]);
 	DOF2_SetInt(file, "Camisinha", pDados[playerid][Camisinha]);
 	DOF2_SetInt(file, "Cereal", pDados[playerid][Cereal]);
-	
+
 	DOF2_SetInt(file, "Emprego", pDados[playerid][Emprego]);
 	DOF2_SaveFile();
 	return true;
@@ -1152,7 +1159,12 @@ stock CarregarConta(playerid, password[])
 {
 	new file[70];
 	format(file, sizeof file, "Contas/%s.ini", Nome(playerid));
-	if(!strcmp(password, DOF2_GetString(file, "Password"), true))
+	if(!strlen(password))
+	{
+		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "..:: Efetuando Login ::..", "Seja bem vindo ao CidadeRP!\nEsta conta está registrada em nosso banco de dados..\nDigite abaixo a sua senha:", "Logar", "Sair");
+	    SendClientMessage(playerid, Branco, "SERVER: INSIRA A SUA PASSWORD!");
+	}
+	if(strcmp(password, DOF2_GetString(file, "Password"), false) == 0)
 	{
 		pDados[playerid][Admin] 	= DOF2_GetInt(file, "Admin");
 		pDados[playerid][Skin] 		= DOF2_GetInt(file, "Skin");
@@ -1161,7 +1173,7 @@ stock CarregarConta(playerid, password[])
 		pDados[playerid][Cigarros] 	= DOF2_GetInt(file, "Cigarros");
 		pDados[playerid][Camisinha] = DOF2_GetInt(file, "Camisinha");
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
-		
+
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
@@ -1170,7 +1182,7 @@ stock CarregarConta(playerid, password[])
 		SetSpawnInfo(playerid, 0, pDados[playerid][Skin], 0.0, 0.0, 0.0, 0.0, -1, -1, -1, -1, -1, -1);
 		SpawnPlayer(playerid);
 		SetPlayerAttachedObject(playerid, 1, 3026, 1, -0.16, -0.08, 0.0, 0.5, 0.5, 0.0);
-		
+
 		for(new i = 0; i < sizeof Interface; ++ i)
 		{
 		    TextDrawShowForPlayer(playerid, Interface[i]);
