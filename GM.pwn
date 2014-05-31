@@ -19,6 +19,9 @@ native WP_Hash(buffer[], len, const str[]); // Whirlpool by Y_Less
 //  Variaveis e Definições
 //
 //----------------------------------------------------------
+#undef MAX_PLAYERS
+#define MAX_PLAYERS 50
+
 #define SetPlayerPosEx(%0,%1,%2,%3,%4) SetPlayerPos(%0,%1,%2,%3) , SetPlayerFacingAngle(%0,%4)
 #define CallBack::%0(%1) forward %0(%1); public %0(%1)
 
