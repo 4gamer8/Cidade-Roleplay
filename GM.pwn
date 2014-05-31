@@ -9,15 +9,18 @@
 //----------------------------------------------------------
 #include <a_samp>
 #include <dof2>
-#include <sscanf>
+#include <sscanf2>
+#include <streamer>
 #include <zcmd>
+
+native WP_Hash(buffer[], len, const str[]); // Whirlpool by Y_Less
 //----------------------------------------------------------
 //
 //  Variaveis e Definições
 //
 //----------------------------------------------------------
 #define SetPlayerPosEx(%0,%1,%2,%3,%4) SetPlayerPos(%0,%1,%2,%3) , SetPlayerFacingAngle(%0,%4)
-#define CallBack::%0(%1) %0(%1); public %0(%1)
+#define CallBack::%0(%1) forward %0(%1); public %0(%1)
 
 #define MAX_ROTAS                   ( 50 )
 #define DIRETORIO_CAMINHONEIRO      "Empregos/Caminhoneiro"
@@ -48,12 +51,14 @@ enum // Dialog's.
 	DIALOG_BUY_247,
 	DIALOG_BUY_PIZZARIA
 };
+
 enum // Empregos
 {
 	DESEMPREGADO,
 	CAMINHONEIRO,
 	TAXISTA
 };
+
 enum rInfo
 {
 	rNome[50],
@@ -68,6 +73,7 @@ enum rInfo
 	Float: rZ
 };
 new rDados[MAX_ROTAS][rInfo];
+
 enum pInfo
 {
 	Admin,
@@ -79,6 +85,7 @@ enum pInfo
 	Emprego
 };
 new pDados[MAX_PLAYERS][pInfo];
+
 new RotaID[MAX_PLAYERS];
 new Text: Interface[5];
 new bool: EmServico[MAX_PLAYERS];
@@ -95,11 +102,12 @@ new Taxistas_CorridaPreco[MAX_PLAYERS];
 new Passageiro_Tempo[MAX_PLAYERS];
 new Passageiro_Preco[MAX_PLAYERS];
 
-new MensagensRandom[][128] = {
-	{"[ CidadeRP ]: Quer anunciar seu site aqui? Entre em contato com nossa equipe via fórum!"},
-	{"[ CidadeRP ]: Este servidor é totalmente OpenSource! Seu código de fonte está dísponivel na internet."},
-	{"[ CidadeRP ]: Está afim de se comunicar com a administração? Então use /ask!"},
-	{"[ CidadeRP ]: Não sabe os comandos do servidor? Então use /ajuda."}
+new MensagensRandom[][] =
+{
+	"[ CidadeRP ]: Quer anunciar seu site aqui? Entre em contato com nossa equipe via fórum!",
+	"[ CidadeRP ]: Este servidor é totalmente OpenSource! Seu código de fonte está dísponivel na internet.",
+	"[ CidadeRP ]: Está afim de se comunicar com a administração? Então use /ask!",
+	"[ CidadeRP ]: Não sabe os comandos do servidor? Então use /ajuda."
 };
 
 new xString[128]; // string principal usada para comandos e coisa simples
@@ -205,18 +213,18 @@ public OnGameModeInit()
 	TextDrawSetOutline(Interface[4], 1);
 	TextDrawSetProportional(Interface[4], 1);
 
-	AddStaticPickup(1318, 23, -2442.7583, 754.9297, 35.1719, -1); // 24/7 San Fierro
-	AddStaticPickup(1318, 23, -25.884498, -185.868988, 1003.546875, -1);
+	CreateDynamicPickup(1318, 23, -2442.7583, 754.9297, 35.1719, -1); // 24/7 San Fierro
+	CreateDynamicPickup(1318, 23, -25.884498, -185.868988, 1003.546875, -1);
 
-	AddStaticPickup(1239, 23, -29.8000, -185.1145, 1003.5469, -1); // Menu de Compras.
+	CreateDynamicPickup(1239, 23, -29.8000, -185.1145, 1003.5469, -1); // Menu de Compras.
 
-	AddStaticPickup(1318, 23, -1808.7319, 945.8968, 24.8906, -1); // Well stacked pizza
-	AddStaticPickup(1318, 23, 372.2366, -133.4248, 1001.4922, -1);
+	CreateDynamicPickup(1318, 23, -1808.7319, 945.8968, 24.8906, -1); // Well stacked pizza
+	CreateDynamicPickup(1318, 23, 372.2366, -133.4248, 1001.4922, -1);
 
-	Create3DTextLabel("24/7 ( San Fierro )\nPrecione 'F' para entrar.", AzulBB, -2442.7583, 754.9297, 35.1719, 10.0, 0);
-	Create3DTextLabel("Menu de Compras\nPrecione 'F' para utilizar.", AzulBB, -29.8000, -185.1145, 1003.5469, 10.0, 0);
+	CreateDynamic3DTextLabel("24/7 ( San Fierro )\nPrecione 'F' para entrar.", AzulBB, -2442.7583, 754.9297, 35.1719, 10.0, 0);
+	CreateDynamic3DTextLabel("Menu de Compras\nPrecione 'F' para utilizar.", AzulBB, -29.8000, -185.1145, 1003.5469, 10.0, 0);
 
-	Create3DTextLabel("Well Stacked Pizza\nPrecione 'F' para entrar.", AzulBB, -1808.7319, 945.8968, 24.8906, 10.0, 0);
+	CreateDynamic3DTextLabel("Well Stacked Pizza\nPrecione 'F' para entrar.", AzulBB, -1808.7319, 945.8968, 24.8906, 10.0, 0);
 
 	// Veículos Truck / Cargas:
 	Veiculo_Truck[ 0 ] = AddStaticVehicle(403,-1707.0216,25.9880,4.1621,225.4480,0,0);  // Veículo Truck
@@ -649,6 +657,11 @@ CallBack::PlayerUpdate(playerid)
 		}
 	}
 	return true;
+}
+
+public OnPlayerPickUpDynamicPickup(playerid, pickupid)
+{
+	return 1;
 }
 //----------------------------------------------------------
 //
@@ -1154,7 +1167,9 @@ stock CriarConta(playerid, sendername[], password[])
 	if(!DOF2_FileExists(file))
 	{
 	    DOF2_CreateFile(file);
-	    DOF2_SetString(file, "Password", password);
+	    new hash[129];
+	    WP_Hash(hash, sizeof(hash), password);
+	    DOF2_SetString(file, "Password", hash);
 	    DOF2_SetInt(file, "Admin", 0);
 	    DOF2_SetInt(file, "Dinheiro", 350);
 	    DOF2_SetInt(file, "Skin", 25);
@@ -1199,7 +1214,7 @@ stock SalvarConta(playerid)
 	new file[70];
 	format(file, sizeof file, "Contas/%s.ini", Nome(playerid));
 	if(!IsPlayerConnected(playerid)) return print("O Jogador desejado está offline..");
-	if(!DOF2_FileExists(file)) return print("Conta desejada inexistente..");
+	if(!DOF2_FileExists(file)) return printf("[SERVER] - Conta com o nome %s tentou ser salva sem a mesma existir", Nome(playerid));
 	DOF2_SetInt(file, "Admin", pDados[playerid][Admin]);
 	DOF2_SetInt(file, "Skin", pDados[playerid][Skin]);
 	DOF2_SetInt(file, "Dinheiro", pDados[playerid][Dinheiro]);
@@ -1222,7 +1237,9 @@ stock CarregarConta(playerid, password[])
 		ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "..:: Efetuando Login ::..", "Seja bem vindo ao CidadeRP!\nEsta conta está registrada em nosso banco de dados..\nDigite abaixo a sua senha:", "Logar", "Sair");
 	    SendClientMessage(playerid, Branco, "SERVER: INSIRA A SUA PASSWORD!");
 	}
-	if(strcmp(password, DOF2_GetString(file, "Password"), false) == 0)
+	new hash[129];
+ 	WP_Hash(hash, sizeof(hash), password);
+	if(strcmp(hash, DOF2_GetString(file, "Password"), false) == 0)
 	{
 		pDados[playerid][Admin] 	= DOF2_GetInt(file, "Admin");
 		pDados[playerid][Skin] 		= DOF2_GetInt(file, "Skin");
