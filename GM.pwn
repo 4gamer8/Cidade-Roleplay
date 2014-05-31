@@ -298,6 +298,12 @@ public OnPlayerDisconnect(playerid, reason)
 	{
 	    SalvarConta(playerid);
 	}
+	
+	for (new p; p < sizeof(pDados[]); ++p) //Reseta a array do player, evita alguns bugs
+	{
+		pDados[playerid][pInfo: p] = 0;
+	}
+	
 	return true;
 }
 public OnPlayerSpawn(playerid)
