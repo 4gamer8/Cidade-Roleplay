@@ -9,7 +9,7 @@
 //----------------------------------------------------------
 #include <a_samp>
 #include <dof2>
-#include <sscanf>
+#include <sscanf2>
 #include <zcmd>
 #pragma unused DOF2_Exit
 //----------------------------------------------------------
@@ -99,6 +99,8 @@ new MensagensRandom[][128] = {
 	{"[ CidadeRP ]: Está afim de se comunicar com a administração? Então use /ask!"},
 	{"[ CidadeRP ]: Não sabe os comandos do servidor? Então use /ajuda."}
 };
+
+new xString[128];
 //----------------------------------------------------------
 //
 //  Callbacks e Main()
@@ -164,7 +166,7 @@ main()
 	TextDrawSetOutline(Interface[1], 0);
 	TextDrawSetProportional(Interface[1], 1);
 	TextDrawSetShadow(Interface[1], 1);
-	
+
 	Interface[2] = TextDrawCreate(535.000000, 404.000000, "OPENSOURCE");
 	TextDrawBackgroundColor(Interface[2], 255);
 	TextDrawFont(Interface[2], 3);
@@ -245,7 +247,10 @@ public OnPlayerConnect(playerid)
 	{
 	    SendClientMessage(playerid, Branco, " ");
 	}
-    
+	
+	for (new p; p < sizeof(pDados[]); ++p)
+ 		pDados[playerid][pInfo: p] = 0;
+
 	EmServico[playerid] 			= false;
 	Logado[playerid] 				= false;
 	IsPlayerInDave[playerid]    	= false;
@@ -253,7 +258,7 @@ public OnPlayerConnect(playerid)
 	Taxistas_CorridaPreco[playerid]	= 0;
 	Passageiro_Tempo[playerid]		= 0;
 	Passageiro_Preco[playerid]		= 0;
-	
+
 	if(!IsPlayerNPC(playerid))
 	{
 		if(DOF2_FileExists(file))
@@ -550,7 +555,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		                GivePlayerMoney(playerid, -25);
 		                pDados[playerid][Dinheiro] -= 25;
 		            }
-		            
+
 		            case 3: //[PIZZA] 4 Queijos [PEQUENA]. - $15.00
 		            {
 		                SendClientMessage(playerid, Amarelo2, "» Você comeu uma pizza 4 Queijos [PEQUENA] no valor de $15,00");
@@ -569,7 +574,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		                GivePlayerMoney(playerid, -25);
 		                pDados[playerid][Dinheiro] -= 25;
 		            }
-		            
+
 		            case 6: //[PIZZA] Calabresa com Catupiry [PEQUENA]. - $25.00
 		            {
 		                SendClientMessage(playerid, Amarelo2, "» Você comeu uma pizza Calabresa com Catupiry [PEQUENA] no valor de $25,00");
@@ -638,11 +643,10 @@ CallBack::PlayerUpdate(playerid)
 //----------------------------------------------------------
 COMMAND:admins(playerid, params[])
 {
-	new Nivel_Admin[16];
-	new String[128];
 	SendClientMessage(playerid, Amarelo2, "Administradores(as) online:");
 	for(new i = 0; i < MAX_PLAYERS; ++i)
 	{
+	    new Nivel_Admin[16];
 	    switch( pDados[i][Admin] )
 	    {
 	        case 1: Nivel_Admin = "Beta Tester";
@@ -654,31 +658,28 @@ COMMAND:admins(playerid, params[])
 		}
 		if( pDados[i][Admin] > 0 )
 		{
-		    format(String, sizeof String, "%s: %s [ID:%d] - %s", Nivel_Admin, Nome(i), i, EmServico[i] ? ("Em Serviço") : ("Fora de Serviço"));
-		    SendClientMessage(playerid, Branco, String);
+		    format(xString, sizeof xString, "%s: %s [ID:%d] - %s", Nivel_Admin, Nome(i), i, EmServico[i] ? ("Em Serviço") : ("Fora de Serviço"));
+		    SendClientMessage(playerid, Branco, xString);
 		}
 	}
 	return true;
 }
 COMMAND:taxistas(playerid, params[])
 {
-	new String[128];
 	SendClientMessage(playerid, Amarelo2, "Taxistas online:");
 	for(new i = 0; i < MAX_PLAYERS; ++i)
 	{
 		if(pDados[i][Emprego] == TAXISTA)
 		{
-		    format(String, sizeof String, "[Taxista]: %s Modo: %s.", Nome(i), Taxistas_EmCorrida[i] ? ("Em Serviço") : ("Fora de Serviço"));
-		    SendClientMessage(playerid, Branco, String);
+		    format(xString, sizeof xString, "[Taxista]: %s Modo: %s.", Nome(i), Taxistas_EmCorrida[i] ? ("Em Serviço") : ("Fora de Serviço"));
+		    SendClientMessage(playerid, Branco, xString);
 		}
 	}
 	return true;
 }
 COMMAND:status(playerid)
 {
-	new String[ 128 ];
 	new Emprego_String[ 50 ];
-
 	switch( pDados[playerid][Emprego] )
 	{
 	    case DESEMPREGADO: 	Emprego_String = "Desempregado";
@@ -687,43 +688,40 @@ COMMAND:status(playerid)
 	}
 
 	SendClientMessage(playerid, Branco, "Suas informações:");
-	format(String, sizeof String, "Nome: [%s] Dinheiro: [$%d] Skin ID: [%d] Emprego: [%s]", Nome(playerid), GetPlayerMoney(playerid), pDados[playerid][Skin], Emprego_String);
-	SendClientMessage(playerid, COLOR_FADE1, String);
-	format(String, sizeof String, "Camisinhas: [%d] Cigarros: [%d] Barras de Cereal: [%d]", pDados[playerid][Camisinha], pDados[playerid][Cigarros], pDados[playerid][Cereal]);
-	SendClientMessage(playerid, COLOR_FADE2, String);
+	format(xString, sizeof xString, "Nome: [%s] Dinheiro: [$%d] Skin ID: [%d] Emprego: [%s]", Nome(playerid), GetPlayerMoney(playerid), pDados[playerid][Skin], Emprego_String);
+	SendClientMessage(playerid, COLOR_FADE1, xString);
+	format(xString, sizeof xString, "Camisinhas: [%d] Cigarros: [%d] Barras de Cereal: [%d]", pDados[playerid][Camisinha], pDados[playerid][Cigarros], pDados[playerid][Cereal]);
+	SendClientMessage(playerid, COLOR_FADE2, xString);
 	return true;
 }
 COMMAND:me(playerid, params[])
 {
 	new Acao[128];
-	new String[128];
 	new Float: p[3];
 	GetPlayerPos(playerid, p[0], p[1], p[2]);
 	if(sscanf(params,"s[128]",Acao))
 	    return SendClientMessage(playerid, Cinza, "Comando: /me [ação]");
-	format(String, sizeof String, "* %s %s.", Nome(playerid), Acao);
+	format(xString, sizeof xString, "* %s %s.", Nome(playerid), Acao);
     for(new chat; chat < MAX_PLAYERS; chat++)
     {
 		if(IsPlayerInRangeOfPoint(playerid, 10.0, p[0], p[1], p[2]))
         {
-        	SendClientMessage(playerid, -1, String);
+        	SendClientMessage(playerid, -1, xString);
         }
   	}
 	return true;
 }
 COMMAND:ask(playerid, params[])
 {
-	new Pergunta[128];
-	new String[128];
-	if(sscanf(params,"s[128]",Pergunta))
+	if(sscanf(params,"s[128]", params))
 		return SendClientMessage(playerid, Cinza, "Comando: /ask [pergunta]");
 
 	for(new i = 0; i < MAX_PLAYERS; ++i)
 	{
 	    if( pDados[i][Admin] > 0 )
 	    {
-			format(String, sizeof String, "• Pergunta (/ask): %s [ID:%d] » %s.", Nome(playerid), playerid, Pergunta);
-			SendClientMessage(i, Amarelo, String);
+			format(xString, sizeof xString, "• Pergunta (/ask): %s [ID:%d] » %s.", Nome(playerid), playerid, params);
+			SendClientMessage(i, Amarelo, xString);
 		}
 	}
 
@@ -984,23 +982,18 @@ COMMAND:criarcarro(playerid, params[])
 }
 COMMAND:criarrota(playerid, params[])
 {
-	new Float: Pos[3];
-	new Nome_Rota[50];
-	new carga;
-	new String[128];
-	new int[2];
+	new Float:Pos[3], Nome_Rota[50], carga, xint[2];
 	if( !EmServico[playerid] )
 	    return SendClientMessage(playerid, Cinza, "• Apenas para administradores em serviço.");
 	if(pDados[playerid][Admin] < 6)
 		return SendClientMessage(playerid, Cinza, "• Apenas pessoal autorizado.");
-	if(sscanf(params, "s[50]iii", Nome_Rota, carga, int[0], int[1]))
+	if(sscanf(params, "iiis[50]", carga, xint[0], xint[1], Nome_Rota))
 	    return SendClientMessage(playerid, Cinza, "Comando: /criarrota [nome] [carga] [valor] [exp]");
 
 	GetPlayerPos(playerid, Pos[0], Pos[1], Pos[2]);
-	CriarRota(Pos[0], Pos[1], Pos[2], Nome_Rota, carga, int[0], int[1]);
+	CriarRota(Pos[0], Pos[1], Pos[2], Nome_Rota, carga, xint[0], xint[1]);
 
-	new file[70];
-	new file2[70];
+	new file[70], file2[70];
 	format(file2, sizeof file2, "%s/ultimo.ini", DIRETORIO_CAMINHONEIRO);
 	for(new i = 0; i < DOF2_GetInt(file2, "Ultimo ID"); ++ i)
 	{
@@ -1020,18 +1013,18 @@ COMMAND:criarrota(playerid, params[])
 	}
 
 	SendClientMessageToAll(Branco, " ");
-	format(String, sizeof String, "======================================================================================");
-	SendClientMessageToAll(Branco, String);
-	format(String, sizeof String, "( Atenção Caminhoneiros ) O Desenvolvedor %s acaba de criar uma nova rota!", Nome(playerid));
-	SendClientMessageToAll(Amarelo2, String);
-	format(String, sizeof String, "Informações:");
-	SendClientMessageToAll(Cinza, String);
-	format(String, sizeof String, "Nome: [%s] Carga: [%d] Valor: [%d] Experiencia: [%d]", Nome_Rota, carga, int[0], int[1]);
-	SendClientMessageToAll(Cinza, String);
-	format(String, sizeof String, "Rota disponivel em qualquer empresa.");
-	SendClientMessageToAll(Amarelo2, String);
-	format(String, sizeof String, "======================================================================================");
-	SendClientMessageToAll(Branco, String);
+	format(xString, sizeof xString, "======================================================================================");
+	SendClientMessageToAll(Branco, xString);
+	format(xString, sizeof xString, "( Atenção Caminhoneiros ) O Desenvolvedor %s acaba de criar uma nova rota!", Nome(playerid));
+	SendClientMessageToAll(Amarelo2, xString);
+	format(xString, sizeof xString, "Informações:");
+	SendClientMessageToAll(Cinza, xString);
+	format(xString, sizeof xString, "Nome: [%s] Carga: [%d] Valor: [%d] Experiencia: [%d]", Nome_Rota, carga, xint[0], xint[1]);
+	SendClientMessageToAll(Cinza, xString);
+	format(xString, sizeof xString, "Rota disponivel em qualquer empresa.");
+	SendClientMessageToAll(Amarelo2, xString);
+	format(xString, sizeof xString, "======================================================================================");
+	SendClientMessageToAll(Branco, xString);
 	SendClientMessageToAll(Branco, " ");
 	return true;
 }
@@ -1071,7 +1064,7 @@ stock CriarRota(Float:X, Float:Y, Float:Z, nome[], carga, valor, exp)
 	DOF2_CreateFile(file);
 	DOF2_SetString(file, "Nome", nome);
 	DOF2_SetInt(file, "Carga", carga);
-	
+
 	DOF2_SetFloat(file, "X", X);
 	DOF2_SetFloat(file, "Y", Y);
 	DOF2_SetFloat(file, "Z", Z);
@@ -1081,7 +1074,7 @@ stock CriarRota(Float:X, Float:Y, Float:Z, nome[], carga, valor, exp)
 	DOF2_SetInt(file, "ID", DOF2_GetInt(file2, "Ultimo ID"));
 	DOF2_SetInt(file, "Bloqueio", 0);
 	DOF2_SetInt(file, "Tempo", 0);
-	
+
 	DOF2_SetInt(file2, "Ultimo ID", DOF2_GetInt(file2, "Ultimo ID") + 1);
 	DOF2_SaveFile();
 	return true;
@@ -1111,7 +1104,7 @@ stock CriarConta(playerid, sendername[], password[])
 		pDados[playerid][Cigarros] 	= DOF2_GetInt(file, "Cigarros");
 		pDados[playerid][Camisinha] = DOF2_GetInt(file, "Camisinha");
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
-		
+
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
@@ -1141,11 +1134,11 @@ stock SalvarConta(playerid)
 	DOF2_SetInt(file, "Admin", pDados[playerid][Admin]);
 	DOF2_SetInt(file, "Skin", pDados[playerid][Skin]);
 	DOF2_SetInt(file, "Dinheiro", pDados[playerid][Dinheiro]);
-	
+
 	DOF2_SetInt(file, "Cigarros", pDados[playerid][Cigarros]);
 	DOF2_SetInt(file, "Camisinha", pDados[playerid][Camisinha]);
 	DOF2_SetInt(file, "Cereal", pDados[playerid][Cereal]);
-	
+
 	DOF2_SetInt(file, "Emprego", pDados[playerid][Emprego]);
 	DOF2_SaveFile();
 	return true;
@@ -1164,7 +1157,7 @@ stock CarregarConta(playerid, password[])
 		pDados[playerid][Cigarros] 	= DOF2_GetInt(file, "Cigarros");
 		pDados[playerid][Camisinha] = DOF2_GetInt(file, "Camisinha");
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
-		
+
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
@@ -1173,7 +1166,7 @@ stock CarregarConta(playerid, password[])
 		SetSpawnInfo(playerid, 0, pDados[playerid][Skin], 0.0, 0.0, 0.0, 0.0, -1, -1, -1, -1, -1, -1);
 		SpawnPlayer(playerid);
 		SetPlayerAttachedObject(playerid, 1, 3026, 1, -0.16, -0.08, 0.0, 0.5, 0.5, 0.0);
-		
+
 		for(new i = 0; i < sizeof Interface; ++ i)
 		{
 		    TextDrawShowForPlayer(playerid, Interface[i]);
