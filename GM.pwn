@@ -5,6 +5,9 @@
 //
 //  ANOTAÇÕES:
 //  1ª- Criar um taximetro logo.
+/// 
+// Novidade:
+// Simples sistema Bancário - BlueX
 //
 //----------------------------------------------------------
 #include <a_samp>
@@ -12,6 +15,7 @@
 #include <sscanf2>
 #include <streamer>
 #include <zcmd>
+#include <MSi\msi_logs> //Esta include servirá para criar logs do servidor
 
 native WP_Hash(buffer[], len, const str[]); // Whirlpool by Y_Less
 //----------------------------------------------------------
@@ -85,7 +89,9 @@ enum pInfo
 	Cigarros,
 	Camisinha,
 	Cereal,
-	Emprego
+	Emprego,
+	Banco,
+	BancoDinheiro
 };
 new pDados[MAX_PLAYERS][pInfo];
 
@@ -779,6 +785,71 @@ COMMAND:ajuda(playerid)
 	return true;
 }
 //----------------------------------------------------------
+//  Comandos do sistema bancário
+//----------------------------------------------------------
+
+COMMAND:criarconta(playerid,params[])
+{
+	if(pDados[playerid][Banco] != 0) //o jogador já tem uma conta bancária
+		return SendClientMessage(playerid, Cinza, "Você já tem uma conta bancária");
+		
+	if(GetPlayerMoney < 100)
+		return SendClientMessage(playerid, Cinza, "Você precisa de 100$ para abrir uma conta bancária");
+	
+	ifGetPlayerMoney >= 100)
+	{
+		if(sscanf(params, "s[2]", paramas[0]))
+			return SendClientMessage(playerid, Cinza, "Você tem 100$, deseja abrir uma conta? Sim - s | Não - n");
+		
+		if(!strcmp(params[0],"s"))
+		{
+			pDados[playerid][Banco] = ( rand(999999 - 100000 ) + 100000 ); //Isto vai servir de minrand
+			pDados[playerid][Dinheiro] -= 100;
+			pDados[playerid][BancoDinheiro] += 100;
+			GivePlayerMoney(playerid, -100);
+			SalvarConta(playerid);
+			
+		} else if(!strcmp(params[0],"n")) {
+			return SendCientMessage(playerid, Cinza, "Você decidiu não abrir uma conta");
+		} else { return SendClientMessage(playerid,Cinza,"Erro: Você não utilizou a opção correrta");
+	}
+	return true
+}
+
+CMD:transferir(playerid,params[])
+{
+	if(pDados[playerid][Banco] == 0)
+		return SendClientMessage(playerid, Cinza,"Você não tem uma conta bancária");
+	
+	new bank_number, amount;
+	
+	if(sscanf(params, "ii", bank_number, amount))
+		return SendClientMessage(playerid, Cinza, "Utilize: /transferir [número da conta bancária] [quantia]");
+	
+	new file[70];
+	for(new i; i <= MAX_PLAYERS; i++)
+	{
+	
+		if(IsPlayerConnected(i))
+		{
+			if(bank_number == pDados[i][Banco])
+			{
+				if(amount > 0)
+				{
+					pDados[i][BancoDinheiro] += amount;
+					pDados[playerid][BancoDinheiro] -= amount;
+					format(str, sizeof str, "Você recebeu %i$ de %s (Nº %i)",amount,Nome(playerid),pDados[playerid][Banco]);
+					SendClientMessage(playerid, Verde, str);
+					format(str, sizeof str, "Você enviou %i$ para %s (Nº %i)",amount,Nome(i),bank_number);
+				}
+			}
+		}
+	
+	}
+	return true;
+}
+
+//----------------------------------------------------------
 //  Comandos dos Empregos: Caminhoneiro.
 //----------------------------------------------------------
 COMMAND:entregar(playerid)
@@ -1188,8 +1259,15 @@ stock CriarConta(playerid, sendername[], password[])
 	    DOF2_SetInt(file, "Cereal", 0);
 
 	    DOF2_SetInt(file, "Emprego", DESEMPREGADO);
+	    DOF2_SetInt(file, "Banco", 0);
+	    DOF2_SetInt(file, "BancoDinheiro", 0);
 	    DOF2_SaveFile();
 
+		/*
+		
+		Isto não é correto, pois não existe necessidade de acessar o ficheiro
+		visto que o valor das variáveis são standart
+		
 		pDados[playerid][Admin] 	= DOF2_GetInt(file, "Admin");
 		pDados[playerid][Skin] 		= DOF2_GetInt(file, "Skin");
 		pDados[playerid][Dinheiro]  = DOF2_GetInt(file, "Dinheiro");
@@ -1199,6 +1277,17 @@ stock CriarConta(playerid, sendername[], password[])
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
 
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
+		*/
+		
+		pDados[playerid][Admin] 	= 0;
+		pDados[playerid][Skin]  	= 25;
+		pDados[playerid][Dinheiro] 	= 350;
+		pDados[playerid][Cigarros] 	= 0;
+		pDados[playerid][Camisinha] 	= 0;
+		pDados[playerid][Cereal] 	= 0;
+		pDados[playerid][Emprerego] 	= DESEMPREGADO;
+		pDados[playerid][Banco] 	= 0;
+		pDados[playerid][BancoDinheiro] = 0;
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
 		Logado[playerid] = true;
@@ -1233,6 +1322,8 @@ stock SalvarConta(playerid)
 	DOF2_SetInt(file, "Cereal", pDados[playerid][Cereal]);
 
 	DOF2_SetInt(file, "Emprego", pDados[playerid][Emprego]);
+	DOF2_SetInt(file, "Banco", pDados[playerid][Banco]);
+	DOF2_SetInt(file, "BancoDinheiro", pDados[playerid][BancoDinheiro]);
 	DOF2_SaveFile();
 	return true;
 }
@@ -1252,13 +1343,15 @@ stock CarregarConta(playerid, password[])
 	{
 		pDados[playerid][Admin] 	= DOF2_GetInt(file, "Admin");
 		pDados[playerid][Skin] 		= DOF2_GetInt(file, "Skin");
-		pDados[playerid][Dinheiro]  = DOF2_GetInt(file, "Dinheiro");
+		pDados[playerid][Dinheiro]  	= DOF2_GetInt(file, "Dinheiro");
 
 		pDados[playerid][Cigarros] 	= DOF2_GetInt(file, "Cigarros");
-		pDados[playerid][Camisinha] = DOF2_GetInt(file, "Camisinha");
+		pDados[playerid][Camisinha] 	= DOF2_GetInt(file, "Camisinha");
 		pDados[playerid][Cereal]  	= DOF2_GetInt(file, "Cereal");
 
 		pDados[playerid][Emprego]  	= DOF2_GetInt(file, "Emprego");
+		pDados[playerid][Banco] 	= DOF2_GetInt(file, "Banco");
+		pDados[playerid][BancoDinheiro] = DOF2_GetInit(file, "BancoDinheiro");
 
 		GivePlayerMoney(playerid, pDados[playerid][Dinheiro]);
 		Logado[playerid] = true;
